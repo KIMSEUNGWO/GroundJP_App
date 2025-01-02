@@ -18,13 +18,17 @@ class UserNotifier extends StateNotifier<UserProfile?> {
   UserNotifier() : super(null);
 
   SocialAPI? socialAPI;
+  final Map<SocialProvider, SocialAPI> _map = {
+    SocialProvider.LINE : LineAPI(),
+    SocialProvider.KAKAO : KakaoApi(),
+  };
 
   void setProfile(UserProfile newProfile) {
     state = newProfile;
   }
 
   Future<ResponseResult> login(BuildContext context, WidgetRef ref, SocialProvider provider) async {
-    socialAPI = getSocialType(provider);
+    socialAPI = _map[provider];
     final socialResult = await socialAPI!.login();
     if (socialResult == null) {
       state = null;
@@ -52,10 +56,12 @@ class UserNotifier extends StateNotifier<UserProfile?> {
   }
 
   void logout(WidgetRef ref) async {
+    await UserService.instance.logout();
+
     ref.read(favoriteNotifier.notifier).logout();
     ref.read(couponNotifier.notifier).logout();
 
-    socialAPI = socialAPI ?? getSocialType(state!.provider);
+    socialAPI = socialAPI ?? _map[state!.provider];
     socialAPI!.logout();
     state = null;
   }
@@ -65,22 +71,18 @@ class UserNotifier extends StateNotifier<UserProfile?> {
   }
 
   init(WidgetRef ref) async {
-    final result = await TokenService.instance.readUser();
-    if (result) {
-      state = await UserService.instance.getProfile();
-      ref.read(favoriteNotifier.notifier).init();
-      ref.read(couponNotifier.notifier).init();
-    }
+    state = await UserService.instance.getProfile();
+    print('user : ${state?.nickname}');
+    ref.read(favoriteNotifier.notifier).init();
+    ref.read(couponNotifier.notifier).init();
   }
 
   readUser(WidgetRef ref) async {
-    final result = await TokenService.instance.readUser();
-    if (result) {
       state = await UserService.instance.getProfile();
       ref.read(favoriteNotifier.notifier).init();
-    } else {
-      logout(ref);
-    }
+      if (state == null) {
+        logout(ref);
+      }
   }
 
   refreshCash() async {
@@ -97,15 +99,6 @@ class UserNotifier extends StateNotifier<UserProfile?> {
 
   UserProfile? get() {
     return state;
-  }
-
-  SocialAPI getSocialType(SocialProvider provider) {
-    return switch (provider) {
-      SocialProvider.LINE => LineAPI(),
-      SocialProvider.KAKAO => KakaoApi(),
-      // TODO: Handle this case.
-      SocialProvider.APPLE => throw UnimplementedError(),
-    };
   }
 
   int getId() {

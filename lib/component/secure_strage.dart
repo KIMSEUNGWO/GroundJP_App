@@ -42,7 +42,7 @@ class SecureStorage {
     // print('[SECURE_STORAGE] deleteAllByToken !!');
   }
 
-  // 에세스 토큰 저장
+  // 엑세스 토큰 저장
   Future<void> saveAccessToken(String accessToken) async {
     try {
       // print('[SECURE_STORAGE] saveAccessToken: $accessToken');

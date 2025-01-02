@@ -36,6 +36,7 @@ class _HomePageState extends ConsumerState<HomeWidget> with AutomaticKeepAliveCl
   UniqueKey _refreshMatchSoon = UniqueKey();
 
   _refresh() {
+    print('refresh');
     setState(() {
       _refreshMatchSoon = UniqueKey();
     });
@@ -43,7 +44,6 @@ class _HomePageState extends ConsumerState<HomeWidget> with AutomaticKeepAliveCl
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(loginProvider);
-    if (state != null) _refreshMatchSoon = UniqueKey();
     super.build(context);
     return Scaffold(
       appBar: AppBar(
@@ -86,7 +86,8 @@ class _HomePageState extends ConsumerState<HomeWidget> with AutomaticKeepAliveCl
           CustomScrollRefresh(onRefresh: _refresh),
           SliverToBoxAdapter(child: _Banners(),),
           SliverToBoxAdapter(
-            child: MatchSoonDisplay(
+            child: state == null ? const SizedBox() :
+            MatchSoonDisplay(
               key: _refreshMatchSoon,
             ),
           ),

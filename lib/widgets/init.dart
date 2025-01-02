@@ -21,7 +21,6 @@ class _InitAppState extends ConsumerState<InitApp> {
 
   init() async {
     await LocalStorage.initInstance();
-    await ref.read(loginProvider.notifier).init(ref);
     ref.read(regionProvider.notifier).init();
     await ref.read(notificationNotifier.notifier).init();
   }

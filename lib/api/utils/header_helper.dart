@@ -1,21 +1,23 @@
-
 import 'package:groundjp/component/secure_strage.dart';
 
 class HeaderHelper {
-
   static const HeaderHelper instance = HeaderHelper();
+
   const HeaderHelper();
 
-  static const Map<String, String> _defaultHeader = {
-    "App-Authorization" : "NnJtQTdJcTU3SnF3N0tleDdLZXg2NmVv",
+  static const Map<String, String> defaultHeader = {
+    "App-Authorization": "NnJtQTdJcTU3SnF3N0tleDdLZXg2NmVv",
   };
-  Future<Map<String, String>> _getAuthorization() async {
-    return {"Authorization" : "Bearer ${await SecureStorage.instance.readAccessToken()}"};
+
+  getAuthorization(String token) {
+    return {"Authorization": "Bearer $token"};
   }
 
-  getHeaders(Map<String, String> requestHeader, bool authorization, Map<String, String>? header) async {
-    requestHeader.addAll(_defaultHeader);
-    if (authorization) requestHeader.addAll(await _getAuthorization());
-    if (header != null) requestHeader.addAll(header);
+  Map<String, String> getHeaders(Map<String, String> requestHeader, String? token, Map<String, String>? header) {
+    Map<String, String> map = {};
+    map.addAll(defaultHeader);
+    if (token != null) map.addAll(getAuthorization(token));
+    if (header != null) map.addAll(header);
+    return map;
   }
 }

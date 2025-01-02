@@ -22,6 +22,9 @@ class CalendarController {
       keepPage: true,
     );
 
+  void init() {
+    pageChange(pageController.initialPage);
+  }
 
   void pageChange(int page) {
     prevDisabled = 0 >= page;

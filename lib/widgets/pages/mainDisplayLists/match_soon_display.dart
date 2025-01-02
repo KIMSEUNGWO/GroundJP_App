@@ -14,70 +14,48 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class MatchSoonDisplay extends ConsumerStatefulWidget {
+class MatchSoonDisplay extends StatefulWidget {
   const MatchSoonDisplay({super.key});
 
   @override
-  ConsumerState<MatchSoonDisplay> createState() => _MatchSoonDisplayState();
+  State<MatchSoonDisplay> createState() => _MatchSoonDisplayState();
 }
 
-class _MatchSoonDisplayState extends ConsumerState<MatchSoonDisplay> {
-
-  late List<MatchView> _result = [];
-
-  _fetch() async {
-    try {
-      List<MatchView> data = await MatchService.instance.getMatchesSoon();
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        if (mounted) {
-          setState(() {
-            _result = data;
-          });
-        }
-      },);
-    } on TimeOutException catch (e) {
-      if (mounted) {
-        Alert.of(context).message(
-          message: e.message,
-        );
-      }
-    } on InternalSocketException catch (e) {
-      if (mounted) {
-        Alert.of(context).message(
-          message: e.message,
-        );
-      }
-    } on ServerException catch (e) {
-      print('Server Exception : ${e.message}');
-    }
-  }
+class _MatchSoonDisplayState extends State<MatchSoonDisplay> {
+  late Future<List<MatchView>> _future;
 
   @override
   void initState() {
-    _fetch();
     super.initState();
+    _future = MatchService.instance.getMatchesSoon();
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(loginProvider);
-    if (state == null || _result.isEmpty) return const SizedBox();
+    return FutureBuilder<List<MatchView>>(
+      future: _future,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SizedBox();
+        }
 
-    return Padding(
-      padding: EdgeInsets.only(left: 20.w, right: 20.w, bottom: 36.h),
-      child: DetailDefaultFormWidget(
-        title: '게임이 곧 시작해요',
-        child: ListView.separated(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          separatorBuilder: (context, index) => const SpaceHeight(12,),
-          itemCount: _result.length,
-          itemBuilder: (context, index) => MatchListWidget(
-            match: _result[index],
-            formatType: DateFormatType.REAMIN_TIME,
+        return Padding(
+          padding: EdgeInsets.only(left: 20.w, right: 20.w, bottom: 36.h),
+          child: DetailDefaultFormWidget(
+            title: '게임이 곧 시작해요',
+            child: ListView.separated(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              separatorBuilder: (context, index) => const SpaceHeight(12,),
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) => MatchListWidget(
+                match: snapshot.data![index],
+                formatType: DateFormatType.REAMIN_TIME,
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

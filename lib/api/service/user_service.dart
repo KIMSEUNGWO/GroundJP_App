@@ -24,7 +24,6 @@ class UserService extends PipeBuffer<UserService> {
   Future<ResultCode> login(SocialResult result) async {
     final response = await ApiService.instance.post(
       uri: '/api/social/login',
-      authorization: false,
       header: ApiService.contentTypeJson,
       body: jsonEncode({
         "socialId" : result.socialId,
@@ -41,12 +40,24 @@ class UserService extends PipeBuffer<UserService> {
     return response.resultCode;
   }
 
-  Future<UserProfile?> getProfile() async {
+  logout() async {
+    await ApiService.instance.delete(
+      uri: '/api/social/logout',
+      header: ApiService.contentTypeJson,
+      body: await SecureStorage.instance.readRefreshToken()
+    );
+  }
 
+
+  Future<UserProfile?> getProfile() async {
+    String? accessToken = await SecureStorage.instance.readAccessToken();
+    if (accessToken == null) return null;
     final response = await ApiService.instance.get(
       uri: '/api/user/profile',
-      authorization: true,
+      token: accessToken,
     );
+
+
 
     if (response.resultCode == ResultCode.OK) {
       return UserProfile.fromJson(response.data);
@@ -58,7 +69,6 @@ class UserService extends PipeBuffer<UserService> {
 
     final response = await ApiService.instance.post(
         uri: '/api/social/register',
-        authorization: false,
         header: ApiService.contentTypeJson,
         body: jsonEncode({
           "sex" : sex.name,
@@ -80,14 +90,14 @@ class UserService extends PipeBuffer<UserService> {
   Future<ResponseResult> getCash() async {
     return await ApiService.instance.get(
       uri: '/api/user/cash',
-      authorization: true,
+      token: await SecureStorage.instance.readAccessToken(),
     );
   }
 
   Future<List<Receipt>> getReceipt() async {
     final response = await ApiService.instance.get(
       uri: '/api/user/receipt',
-      authorization: true,
+      token: await SecureStorage.instance.readAccessToken(),
     );
     if (response.resultCode == ResultCode.OK) {
       return List<Receipt>.from(response.data.map( (x) => Receipt.fromJson(x) ));
@@ -101,7 +111,7 @@ class UserService extends PipeBuffer<UserService> {
 
     final response = await ApiService.instance.get(
       uri: '/api/user/history?date=$formattedDate',
-      authorization: true,
+      token: await SecureStorage.instance.readAccessToken(),
     );
     if (response.resultCode == ResultCode.OK) {
       Map<int, List<MatchView>> result = {};
@@ -121,9 +131,12 @@ class UserService extends PipeBuffer<UserService> {
   }
 
   Future<List<FieldSimp>> getFavorites() async {
+    String? accessToken = await SecureStorage.instance.readAccessToken();
+    if (accessToken == null) return [];
+
     final response = await ApiService.instance.get(
       uri: '/api/user/favorite',
-      authorization: true,
+      token: accessToken,
     );
     if (response.resultCode == ResultCode.OK) {
       return List<FieldSimp>.from(response.data.map((x) => FieldSimp.fromJson(x)));
@@ -135,14 +148,17 @@ class UserService extends PipeBuffer<UserService> {
   void test() async {
     final response = await ApiService.instance.get(
       uri: '/test',
-      authorization: true,
+      token: await SecureStorage.instance.readAccessToken(),
     );
   }
 
-  editFavorite(int fieldId, bool toggle) async {
+  Future<ResultCode> editFavorite(int fieldId, bool toggle) async {
+    String? accessToken = await SecureStorage.instance.readAccessToken();
+    if (accessToken == null) return ResultCode.UNAUTHRIZED;
+
     final response = await ApiService.instance.post(
         uri: '/api/user/favorite',
-        authorization: true,
+        token: await SecureStorage.instance.readAccessToken(),
         header: ApiService.contentTypeJson,
         body: jsonEncode({
           "fieldId" : fieldId,
@@ -155,7 +171,7 @@ class UserService extends PipeBuffer<UserService> {
   Future<List<Coupon>> getCoupons() async {
     final response = await ApiService.instance.get(
       uri: '/api/user/coupon',
-      authorization: true,
+      token: await SecureStorage.instance.readAccessToken(),
     );
     if (response.resultCode == ResultCode.OK) {
       return List<Coupon>.from(response.data.map((x) => Coupon.fromJson(x)));
@@ -168,7 +184,7 @@ class UserService extends PipeBuffer<UserService> {
     String encodedNickname = Uri.encodeComponent(nickname);
     final response = await ApiService.instance.get(
       uri: '/api/user/distinct/nickname?nickname=$encodedNickname',
-      authorization: true,
+      token: await SecureStorage.instance.readAccessToken(),
     );
     if (response.resultCode == ResultCode.OK) {
       return response.data;

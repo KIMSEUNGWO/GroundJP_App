@@ -2,7 +2,8 @@
 enum ResultCode {
   OK,
 
-  NOT_AUTHENTICATION, // 권한 없음
+  UNAUTHRIZED, // 토큰이 불명확함
+  FORBIDDEN, // 권한 없음
 
   MATCH_NOT_EXISTS,
   FIELD_NOT_EXISTS,

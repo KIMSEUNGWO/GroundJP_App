@@ -1,5 +1,6 @@
 
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,7 +27,7 @@ class App extends ConsumerStatefulWidget {
 class _AppState extends ConsumerState<App> {
 
   late PageController _pageController;
-
+  bool _dataLoading = true;
   int _currentIndex = 0;
 
   onChangePage({required int index, bool loginRequire = false}) {
@@ -40,9 +41,17 @@ class _AppState extends ConsumerState<App> {
     }
   }
 
+  initData() async {
+    await ref.read(loginProvider.notifier).init(ref);
+    setState(() {
+      _dataLoading = false;
+    });
+  }
+
   @override
   void initState() {
     _pageController = PageController();
+    initData();
     super.initState();
   }
 
@@ -54,6 +63,14 @@ class _AppState extends ConsumerState<App> {
 
   @override
   Widget build(BuildContext context) {
+    if (_dataLoading) {
+      return Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: Colors.white,
+        child: const Center(child: CupertinoActivityIndicator(),),
+      );
+    }
     return Scaffold(
       body: PageView(
         controller: _pageController,

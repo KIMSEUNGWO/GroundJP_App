@@ -78,6 +78,7 @@ class _CalenderWidgetState extends State<CalenderWidget> {
     _calendarController = CalendarController(
       range: widget.monthRange,
     );
+    _calendarController.init();
     _previousPage = _calendarController.pageController.initialPage;
     super.initState();
   }

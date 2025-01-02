@@ -13,7 +13,6 @@ class SettingService extends PipeBuffer<SettingService> {
   Future<List<Notice>> getPageableNotice(Pageable pageable) async {
     final response = await ApiService.instance.get(
       uri: '/api/search/notice?&${pageable.getParam()}',
-      authorization: false,
     );
     if (response.resultCode == ResultCode.OK) {
       return List<Notice>.from(response.data.map( (x) => Notice.fromJson(x)));

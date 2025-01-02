@@ -42,7 +42,7 @@ class _MatchHistoryWidgetState extends State<MatchHistoryWidget> {
                 onChanged: _selectDate,
                 monthRange: MonthRange(
                   min: DateTime(2024, 6),
-                  max: DateTime(2024, 10),
+                  max: DateTime.now(),
                 ),
               ),
               const SizedBox(height: 16,),

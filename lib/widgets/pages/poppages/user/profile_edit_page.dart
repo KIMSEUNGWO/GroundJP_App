@@ -60,7 +60,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
       data.addAll({'nickname' : nickname});
     }
 
-    final result = await ApiService.instance.multipart('/user/edit', method: MethodType.POST, multipartFilePath: editProfileImagePath, data: data);
+    final result = await ApiService.instance.multipart('/api/user/edit', method: MethodType.POST, multipartFilePath: editProfileImagePath, data: data);
     if (result.resultCode == ResultCode.OK) {
       ref.read(loginProvider.notifier).readUser(ref);
       if (mounted) {

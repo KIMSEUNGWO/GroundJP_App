@@ -72,7 +72,7 @@ class _CommunityEditWidgetState extends ConsumerState<CommunityEditWidget> {
       );
     } else if (code == ResultCode.INVALID_DATA) {
       _bindingError(InvalidData.fromJson(result.data));
-    } else if (code == ResultCode.NOT_AUTHENTICATION) {
+    } else if (code == ResultCode.UNAUTHRIZED) {
       Alert.of(context).message(
         message: '권한이 없습니다.',
         onPressed: () {

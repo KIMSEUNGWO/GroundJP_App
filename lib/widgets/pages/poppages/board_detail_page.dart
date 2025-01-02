@@ -62,7 +62,7 @@ class _BoardDetailWidgetState extends ConsumerState<BoardDetailWidget> {
           Navigator.pop(context);
         },
       );
-    } else if (code == ResultCode.NOT_AUTHENTICATION) {
+    } else if (code == ResultCode.UNAUTHRIZED) {
       Alert.of(context).message(
         message: '권한이 없습니다.',
         onPressed: () {
